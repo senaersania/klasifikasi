@@ -1,0 +1,109 @@
+PROSES SVM
+
+-Normalisasi :
+    example : Recency : (R data ke i - Minimum data R) / (Max R - Min R) * (Standar Max - Standar Min) + Standar Min
+              Frequency : idem
+              Time : idem
+              Monetary : idem
+              Proses dilakukan sekali
+
+-Perhitungan Kernel (x, x') :
+    menggunakan data dari hasil normalisasi
+    example x1, y1  : eksponen {(data A1 - data A1)^2 + (data B1 - data B1)^2 + (data C1 - data C1)^2 + (data D1 - data D1)} / (-2 * varian^2)
+            x1, y2  : eksponen {(data A1 - data A2)^2 + (data B1 - data B2)^2 + (data C1 - data C2)^2 + (data D1 - data D2)} / (-2 * varian^2)
+            x1, y3  : eksponen {(data A1 - data A3)^2 + (data B1 - data B3)^2 + (data C1 - data C3)^2 + (data D1 - data D3)} / (-2 * varian^2)
+            dst
+            x1, y10  : eksponen {(data A1 - data A10)^2 + (data B1 - data B10)^2 + (data C1 - data C10)^2 + (data D1 - data D10)} / (-2 * varian^2)
+    dengan hasil output matriks 10 x 10 ( K(Xi,Yj)
+
+-Perhitungan Matriks Hessian Dij :
+    membutuhkan nilai perhitungan kernel
+    rumus : Yi * Yj (K(Xi,Yj) + λ^2)
+    example [D]11 : 1 * 1 ( x1, y1 + λ^2)
+            [D]12 : 1 * 1 ( x1, y2 + λ^2)
+            [D]13 : 1 * 1 ( x1, y3 + λ^2)
+            dst
+            [D]110 : 1 * -1 ( x1, y10 + λ^2)
+    dengan hasil output matriks 10 x 10 (Dij)
+
+-Perhitungan Nilai Error :
+    membutuhkan nilai perhitungan Matriks Hessian Dij
+    iterasi dilakukan sebanyak 3 kali
+
+    rumus :
+    example E1 : SUM(nilai alpha * D11, nilai alpha * D21, nilai alpha * D31, nilai alpha * D41, ... nilai alpha * D101)
+
+    untuk E2 membutuhkan nilai alpha baru
+    example E2 : SUM(nilai alpha baru * D11, nilai alpha baru * D21, nilai alpha baru * D31, nilai alpha baru * D41, ... nilai alpha baru * D101)
+
+    untuk E3 membutuhkan nilai alpha baru
+    example E3 : SUM(nilai alpha baru iterasi 2 * D11, nilai alpha baru iterasi 2 * D21, nilai alpha baru iterasi 2 * D31, nilai alpha baru iterasi 2 * D41, ... nilai alpha baru * D101)
+    proses dilakukan sebanyak 3 kali
+
+-Perhitungan Nilai Delta Alpha
+    membutuhkan nilai perhitungan error
+    iterasi dilakukan sebanyak 3 kali
+
+    rumus :
+    example δα1 : Min(Max(gamma * ( 1 -  E1 ) ; nilai alpha 0) ; C - nilai alpha 0)
+
+    untuk δα2 membutuhkan nilai alpha baru
+    example δα2 : Min(Max(gamma * ( 1 - E2 ) ; nilai alpha baru ) ; C - nilai alpha baru )
+
+    example δα3 : Min(Max(gamma * ( 1 - E3 ) ; nilai alpha baru iterasi 2 ) ; C - nilai alpha baru iterasi 2)
+    proses dilakukan sebanyak 3 kali
+
+-Perhitungan Nilai Alpha Baru
+    membutuhkan nilai perhitungan delta alpha
+    iterasi dilakukan sebanyak 3 kali
+
+    rumus :
+    example α1 : ( nilai alpha 0 + δα1 )
+
+            α2 : ( nilai alpha baru + δα2 )
+
+            α3 : ( nilai alpha baru iterasi 2 + δα3 )
+    proses dilakukan sebanyak 3 kali
+
+-Perhitungan Nilai Bias
+    membutuhkan nilai perhitungan alpha baru
+
+    rumus : 0,5 * SUM ( nilai alpha terbesar dari kelas positif : nilai alpha terbesar dari kelas negatif )
+
+-Perhitungan Nilai Fungsi (x)
+    Membutuhkan 10 data latih uji baru untuk dicari akurasi dengan data latih sebelumnya
+    10 data latih uji baru di cari nilai kernelnya
+
+PROSES PSO
+
+-Menentukan nilai fitness
+    Diperoleh dengan mengambil nilai akurasi Support Vector Machine (SVM)
+    proses dilakukan berulang kali sebanyak nilai partikel
+
+-Mendapatkan nilai partikel terbaik
+    mengambil partikel terbaik sebagai pbest
+    dan mengambil nilai terbaik dari berbagai pbest sebagai nilai gbest
+    partikel terbaik bisa disebut dengan pbest
+    pbest diperoleh dari pengambilan nilai akurasi terbaik dari
+    proses dilakukan sebanyak nilai partikel
+
+-Menghitung kecepatan partikel
+    membutuhkan nilai lamda, nilai c1, c2, r1, r2
+    nilai pbest dan  nilai gbest
+
+    rumus : ada pada kecepatan partikel 4.4.4.2.12
+
+    example V2(0) = nilai lamda ( lamda pada kecepatan awal + c1 r1 ( pbest - partikel 1 ) c2 r2 ( gbest - partikel 1)
+    proses dilakukan sebanyak nilai partikel
+
+-Menentukan posisi baru partikel
+    membutuhkan nilai partikel dan hasil kecepatan partikel
+
+    rumus : Xj ( i + 1 ) = partikel 1 + kecepatan partikel 1
+    proses dilakukan sebanyak nilai partikel
+
+-Mendapatkan nilai hasil optimasi
+    nilai hasil optimasi didapatkan dari perhitungan svm
+    sebelumnya dilakukan proses update parameter yang digunakan svm dengan pso
+    di dalam proses pso dilakukan update kecepatan dan perpindahan partikel untuk mendapatkan nilai parameter
+    nilai parameter dibutuhkan untuk melakukan perhitungan svm berulang kali sampai mendapatkan akurasi yang maksimal
